@@ -79,8 +79,8 @@ class Graph(object):
 ##                    z+=1
             j=1
             while j<=n:
-                self.users_list[i%self.population].friends_list.append(self.users_list[(i%self.population+j)%self.population].user_id)
-                self.users_list[(i%self.population+j)%self.population].friends_list.append(self.users_list[i%self.population].user_id)
+                self.users_list[i%self.population].friends_list.append(self.users_list[(i%self.population+j)%self.population])
+                self.users_list[(i%self.population+j)%self.population].friends_list.append(self.users_list[i%self.population])
                 j+=1
 ##            print(self.users_list[i%self.population].friends_list)               #### USED FOR TEST
             i+=1
@@ -97,8 +97,8 @@ class Graph(object):
             if a==b:
                 continue
             else :
-                a.friends_list.append(b.user_id)
-                b.friends_list.append(a.user_id)
+                a.friends_list.append(b)
+                b.friends_list.append(a)
                 num_connections-=1
 
 
@@ -135,7 +135,7 @@ class Graph(object):
 ####        while any(self.users_list[i].label == None for i in range(self.population)):
         for i in range(self.population):
             for j in range(len(self.users_list[i].get_friends())):
-                self.users_list[i].tech_list.append(self.users_list[self.users_list[i].get_friends()[j]].get_tech())
+                self.users_list[i].tech_list.append(self.users_list[self.users_list[i].get_friends()[j].get_id()].get_tech())
 ####                for n,s in enumerate(self.users_list[i].tech_list):
 ####                    if s==None:
 ####                        self.users_list[i].tech_list[n]=0       
@@ -158,8 +158,8 @@ class Graph(object):
             self.users_list[i].tech=self.users_list[i].temp_tech
             
             ##USED FOR TEST(OUTPUT)
-##        for i in range(self.population):
-##            print(i,self.users_list[i].tech)
+        for i in range(self.population):
+            print(i,self.users_list[i].tech)
             
         
         
@@ -169,7 +169,13 @@ class Graph(object):
         return self.users_list
     
     def __repr__(self):
-        return str(self.users_list)
+        result=""
+        for user in self.users_list:
+            result = result + str(user.get_id()) + ": "
+            for friend in user.get_friends():
+                result = result + str(friend.get_id()) + " "
+            result += "\n"
+        return result
 
 
 
@@ -184,7 +190,7 @@ class GraphAnalyzer(object):
         self.first_time_flag = True
         self.plan_list = []
         self.first_adopter_list = []
-        self.counter = 0
+##        self.counter = 0
 
     def choose_user(self):
         """returns a user that does not currently have
@@ -193,15 +199,19 @@ class GraphAnalyzer(object):
         if self.first_time_flag == True:
             self.pagerank()
             self.plan_list = self.get_untouched(self.user_list)
-            self.first_adopter_list.append(self.get_best_from_plan())
+            best = self.get_best_from_plan()
+            self.first_adopter_list.append(best)
+            best.tech = self.my_tech
             self.first_time_flag = False
-            return self.first_adopter_list[self.counter]
+            return best
         else:
-            self.counter+=1
+##            self.counter+=1
             self.plan_list = self.get_connected()
             self.plan_list = self.get_untouched(self.plan_list)
-            self.first_adopter_list.append(self.get_best_from_plan())
-            return self.first_adopter_list[self.counter]
+            best = self.get_best_from_plan()
+            self.first_adopter_list.append(best)
+            
+            return best
 
     def pagerank(self, damping_factor=0.85, max_iterations=100, min_delta=0.00001):
         """
@@ -244,16 +254,16 @@ class GraphAnalyzer(object):
                 diff += abs(user.prv - tmp_prv)
                 user.prv = tmp_prv
              
-            print ('This is NO.%s iteration') % (i+1)
+##            print ('This is NO.'+'i+1'+' iteration') 
 ##            print (pagerank)
-            print ('')
+##            print ('')
      
             #stop if PageRank has converged
             if diff < min_delta:
                 break
          
         for user in self.user_list:
-            print(user.get_id()+"\t"+user.prv)
+            print(str(user.get_id())+"\t"+str(user.prv))
 
             
      
@@ -282,9 +292,13 @@ class GraphAnalyzer(object):
 
 
 ##TEST CODE
-gp=Graph(40)
+gp=Graph(10)
 gp.circle_connect(2)
 gp.random_connections(4)
 gp.users_list[0].tech="fuji"
 gp.users_list[3].tech="canon"
 gp.users_list[7].tech="nikon"
+my_tech = Technology("krist","green")
+ga = GraphAnalyzer(gp, my_tech)
+ga.pagerank()
+print(gp)
