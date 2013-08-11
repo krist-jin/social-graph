@@ -49,6 +49,7 @@ class Graph(object):
     def __init__(self, population):
         self.population=population
         self.users_list=[]
+        self.tmp_node_set=set()
         for i in range(self.population):
             self.users_list.append(User(i))
 
@@ -75,18 +76,20 @@ class Graph(object):
                 b.friends_list.append(a)
                 num_connections-=1
 
-    def is_connected(self, user, limit):
-        """returns True if there is a path from every graph User to
-        every other user"""
+    def is_connected(self, seed_user, threshold):
         ## judge whether the undirected graph is connected
-        if limit < 0:
+        ## threshold is the depth of the recursion
+        if threshold < 0:
             return
         else:
-            for friend in user.get_friends():
-                limit-=1
+            for friend in seed_user.get_friends():
+                threshold-=1
                 self.tmp_node_set.add(friend)
-                self.is_connected(friend,limit)    
-        return (len(self.tmp_node_set)), len(self.get_users())
+                self.is_connected(friend,threshold)    
+        return (len(self.tmp_node_set)==len(self.get_users()))
+#         return (len(self.tmp_node_set), len(self.get_users())
+
+        ## second method: using for loop(ugly)
 #         self.tmp_node_set=set()
 #         for a in user.get_friends():
 #             for b in a.get_friends():
