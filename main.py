@@ -29,10 +29,10 @@ class User(object):
         return self.friends_list
 
     def is_friend(self, other):
-        if other in self.friends_list:
+        if other in self.get_friends():
             return True
         else:
-            False
+            return False
 
     def get_id(self):
         return self.user_id
