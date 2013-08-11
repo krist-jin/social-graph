@@ -1,5 +1,6 @@
 import random
 import collections
+from collections import Counter
 class Technology(object):    
     def __init__(self, label, color):
         """Each technology should be constructed with
@@ -157,10 +158,10 @@ class Graph(object):
         for i in range(self.population):
             self.users_list[i].tech=self.users_list[i].temp_tech
             
-            ##USED FOR TEST(OUTPUT)
-        for i in range(self.population):
-            print(i,self.users_list[i].tech)
-            
+#             ##USED FOR TEST(OUTPUT)
+#         for i in range(self.population):
+#             print(i,self.users_list[i].tech)
+#             
         
         
     def get_users(self):
@@ -196,6 +197,7 @@ class GraphAnalyzer(object):
         """returns a user that does not currently have
         a technology, to serve as a first-adopter for 
         this analyzer's technology"""
+#         print("choose user is called...")
         if self.first_time_flag == True:
             self.pagerank()
             self.plan_list = self.get_untouched(self.user_list)
@@ -213,24 +215,6 @@ class GraphAnalyzer(object):
             return best
 
     def pagerank(self, damping_factor=0.85, max_iterations=100, min_delta=0.00001):
-        """
-        Compute and return the PageRank in an directed graph.    
-         
-        @type  graph: digraph
-        @param graph: Digraph.
-         
-        @type  damping_factor: number
-        @param damping_factor: PageRank dumping factor.
-         
-        @type  max_iterations: number 
-        @param max_iterations: Maximum number of iterations.
-         
-        @type  min_delta: number
-        @param min_delta: Smallest variation required for a new iteration.
-         
-        @rtype:  Dict
-        @return: Dict containing all the nodes PageRank.
-        """
          
         graph_size = 500
 
@@ -253,16 +237,14 @@ class GraphAnalyzer(object):
                 diff += abs(user.prv - tmp_prv)
                 user.prv = tmp_prv
              
-##            print ('This is NO.'+'i+1'+' iteration') 
-##            print (pagerank)
-##            print ('')
      
             #stop if PageRank has converged
             if diff < min_delta:
                 break
-         
-        for user in self.user_list:
-            print(str(user.get_id())+"\t"+str(user.prv))
+        
+        # print out each user's page rank value 
+#         for user in self.user_list:
+#             print(str(user.get_id())+"\t"+str(user.prv))
 
             
      
@@ -285,49 +267,60 @@ class GraphAnalyzer(object):
         return best
 
     def get_connected(self):
-#         print("enter get connected fucntion")
         plan_list=self.first_adopter_list[0].get_friends()
         for user in self.first_adopter_list:
-#             plan_list = self.get_common_user(plan_list, user.get_friends())
             plan_list = list(set(plan_list) & set(user.get_friends()))
         if len(plan_list) == 0:
             print("there is no connected user now...")
             plan_list = list(set(plan_list) | set(user.get_friends()))
         return plan_list
     
-    def get_common_user(self, user_list1, user_list2):
-#         print("enter get common user function")
-        userid_list1=[]
-        userid_list2=[]
-        common_user_list=[]
-        for user in user_list1:
-            userid_list1.append(user.get_id())
-        print(userid_list1)
-        for user in user_list2:
-            userid_list2.append(user.get_id())
-        print(userid_list2)
-        for id in list(set(userid_list1) & set(userid_list2)):
-            common_user_list.append(self.user_list[id])
-            print(id, end=" ")
-        print("")
-        print("==========")
-        return common_user_list
-        
-       
-
-
 
 ##TEST CODE
 gp=Graph(500)
 gp.circle_connect(3)
 gp.random_connections(50)
-gp.users_list[0].tech="fuji"
-gp.users_list[3].tech="canon"
-gp.users_list[7].tech="nikon"
+
+# gp.users_list[0].tech="fuji"
+# gp.users_list[3].tech="canon"
+# gp.users_list[7].tech="nikon"
+
 my_tech = Technology("krist","green")
-ga = GraphAnalyzer(gp, my_tech)
+team_list=[]
+for i in range(12):
+    team = Technology(i, i)
+    team_list.append(team)
+team_list.append(my_tech)
+random.shuffle(team_list)
+my_pos = team_list.index(my_tech)
+print("my pos is: "+str(my_pos))
+for i in range(3):
+    for team in team_list[:my_pos]:
+        random.choice(GraphAnalyzer(gp, team).get_untouched(gp.users_list)).tech = team
+    ga = GraphAnalyzer(gp, my_tech)
+    ga.choose_user().tech = my_tech
+    for team in team_list[my_pos+1:]:
+        random.choice(GraphAnalyzer(gp, team).get_untouched(gp.users_list)).tech = team
+print("The first adopter result: ")
+for user in gp.users_list:
+    if user.tech is not None:
+        print(str(user.get_id())+": "+str(user.get_tech().label))
+print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+for i in range(100):
+    gp.time_step()
+result=[]
+for user in gp.users_list:
+    result.append(str(user.get_tech().label))
+print("final result: ")
+print(Counter(result).most_common(13))
+
+        
+        
+    
+
+
 # ga.pagerank()
-print(gp)
-print("First choose: " + str(ga.choose_user().get_id()))
-print("Second choose: " + str(ga.choose_user().get_id()))
-print("Third choose: " + str(ga.choose_user().get_id()))
+# print(gp)
+# print("First choose: " + str(ga.choose_user().get_id()))
+# print("Second choose: " + str(ga.choose_user().get_id()))
+# print("Third choose: " + str(ga.choose_user().get_id()))
