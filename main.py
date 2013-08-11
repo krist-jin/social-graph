@@ -244,7 +244,7 @@ class GraphAnalyzer(object):
 gp=Graph(500)
 gp.circle_connect(3)
 gp.random_connections(50)
-my_tech = Technology("krist","green")
+my_tech = Technology("team8","green")
 team_list=[]
 for i in range(12):
     team = Technology(i, i)
