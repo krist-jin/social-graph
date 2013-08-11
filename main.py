@@ -51,7 +51,7 @@ class User(object):
         return self.tech
 
     def __repr__(self):
-        return (str(self.user_id)+str(self.tech)+str(self.friends_list))
+        return (str(self.user_id)+": "+str(self.tech))
 
 
 class Graph(object):
@@ -205,7 +205,6 @@ class GraphAnalyzer(object):
             self.first_time_flag = False
             return best
         else:
-##            self.counter+=1
             self.plan_list = self.get_connected()
             self.plan_list = self.get_untouched(self.plan_list)
             best = self.get_best_from_plan()
@@ -273,6 +272,9 @@ class GraphAnalyzer(object):
             if user.get_tech() == None:
                 # insert some filter function in this line
                 untouched_list.append(user)
+        if len(untouched_list) == 0:
+            print("there is no untouched user now...")
+            untouched_list.append(self.get_best_from_plan())
         return untouched_list
 
     def get_best_from_plan(self):
@@ -283,22 +285,49 @@ class GraphAnalyzer(object):
         return best
 
     def get_connected(self):
+#         print("enter get connected fucntion")
         plan_list=self.first_adopter_list[0].get_friends()
         for user in self.first_adopter_list:
+#             plan_list = self.get_common_user(plan_list, user.get_friends())
             plan_list = list(set(plan_list) & set(user.get_friends()))
+        if len(plan_list) == 0:
+            print("there is no connected user now...")
+            plan_list = list(set(plan_list) | set(user.get_friends()))
         return plan_list
-
+    
+    def get_common_user(self, user_list1, user_list2):
+#         print("enter get common user function")
+        userid_list1=[]
+        userid_list2=[]
+        common_user_list=[]
+        for user in user_list1:
+            userid_list1.append(user.get_id())
+        print(userid_list1)
+        for user in user_list2:
+            userid_list2.append(user.get_id())
+        print(userid_list2)
+        for id in list(set(userid_list1) & set(userid_list2)):
+            common_user_list.append(self.user_list[id])
+            print(id, end=" ")
+        print("")
+        print("==========")
+        return common_user_list
+        
+       
 
 
 
 ##TEST CODE
-gp=Graph(10)
-gp.circle_connect(2)
-gp.random_connections(4)
+gp=Graph(500)
+gp.circle_connect(3)
+gp.random_connections(50)
 gp.users_list[0].tech="fuji"
 gp.users_list[3].tech="canon"
 gp.users_list[7].tech="nikon"
 my_tech = Technology("krist","green")
 ga = GraphAnalyzer(gp, my_tech)
-ga.pagerank()
+# ga.pagerank()
 print(gp)
+print("First choose: " + str(ga.choose_user().get_id()))
+print("Second choose: " + str(ga.choose_user().get_id()))
+print("Third choose: " + str(ga.choose_user().get_id()))
